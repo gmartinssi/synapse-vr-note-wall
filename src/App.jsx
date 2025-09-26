@@ -473,6 +473,35 @@ const CanvasExperience = () => {
 
   const { screenToFlowPosition } = useReactFlow();
 
+  const adjustScreenPointForHUD = useCallback((point) => {
+    const safePoint = { ...point };
+    const hudPadding = 24;
+    const hudWidth = 500;
+    const hudHeight = 170;
+
+    if (typeof window !== 'undefined') {
+      safePoint.x = clamp(safePoint.x, hudPadding, window.innerWidth - hudPadding);
+      safePoint.y = clamp(safePoint.y, hudPadding, window.innerHeight - hudPadding);
+    }
+
+    const insideHudWidth = safePoint.x >= hudPadding && safePoint.x <= hudPadding + hudWidth;
+    const insideHudHeight = safePoint.y >= hudPadding && safePoint.y <= hudPadding + hudHeight;
+
+    if (insideHudWidth && insideHudHeight) {
+      safePoint.y = hudPadding + hudHeight + 140;
+      safePoint.x = hudPadding + hudWidth + 80;
+    } else if (safePoint.y < hudPadding + 60) {
+      safePoint.y = hudPadding + 60;
+    }
+
+    if (typeof window !== 'undefined') {
+      safePoint.x = clamp(safePoint.x, hudPadding, window.innerWidth - hudPadding);
+      safePoint.y = clamp(safePoint.y, hudPadding, window.innerHeight - hudPadding);
+    }
+
+    return safePoint;
+  }, []);
+
   const onNodesChange = useCallback(
     (changes) => {
       setNodes((current) => applyNodeChanges(changes, current));
@@ -507,14 +536,22 @@ const CanvasExperience = () => {
     [createNote, bringToFront],
   );
 
+  const createNoteFromScreenPoint = useCallback(
+    (screenPoint, options = {}) => {
+      const safePoint = adjustScreenPointForHUD(screenPoint);
+      const position = screenToFlowPosition(safePoint);
+      return createNoteAtPosition(position, options);
+    },
+    [screenToFlowPosition, adjustScreenPointForHUD, createNoteAtPosition],
+  );
+
   const handlePaneDoubleClick = useCallback(
     (event) => {
-      const position = screenToFlowPosition({ x: event.clientX, y: event.clientY });
       clearMergePair();
       closeContextMenu();
-      createNoteAtPosition(position, { text: '' });
+      createNoteFromScreenPoint({ x: event.clientX, y: event.clientY }, { text: '' });
     },
-    [screenToFlowPosition, clearMergePair, closeContextMenu, createNoteAtPosition],
+    [clearMergePair, closeContextMenu, createNoteFromScreenPoint],
   );
 
   const handleNodeClick = useCallback(
@@ -724,6 +761,23 @@ const CanvasExperience = () => {
           </button>
         </div>
       )}
+      <button
+        type="button"
+        onClick={() => {
+          if (typeof window === 'undefined') return;
+          clearMergePair();
+          closeContextMenu();
+          const screenPoint = {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+          };
+          createNoteFromScreenPoint(screenPoint, { text: '' });
+        }}
+        className="absolute bottom-10 right-10 z-50 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500 text-4xl font-bold text-white shadow-[0_25px_60px_rgba(16,185,129,0.45)] transition hover:bg-emerald-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+        aria-label="Create a new sticky note"
+      >
+        +
+      </button>
       <ReactFlow
         className="h-full w-full"
         nodeTypes={nodeTypes}

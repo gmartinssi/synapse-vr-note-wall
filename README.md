@@ -21,7 +21,7 @@ The dev server runs on [http://localhost:5173](http://localhost:5173). Build wit
 
 ## Core Interactions
 
-- Double-tap empty canvas space to create a sticky note at that position.
+- Double-tap empty canvas space or hit the floating + button to create a sticky note.
 - Drag notes to reposition; they float to the front when touched.
 - Hold a note to open the context menu and spawn linked child notes.
 - Drop one note onto another to flag a merge, then tap either note to confirm.
