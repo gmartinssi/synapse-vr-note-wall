@@ -307,11 +307,9 @@ const StickyNoteNode = ({ id, data, selected }) => {
   const bringToFront = useCanvasStore((state) => state.bringToFront);
   const deleteNote = useCanvasStore((state) => state.deleteNote);
   const setNodeSize = useCanvasStore((state) => state.setNodeSize);
-  const setContextMenu = useCanvasStore((state) => state.setContextMenu);
   const closeContextMenu = useCanvasStore((state) => state.closeContextMenu);
   const mergePair = useCanvasStore((state) => state.mergePair);
   const mergeNotes = useCanvasStore((state) => state.mergeNotes);
-  const setNodeDragging = useCanvasStore((state) => state.setNodeDragging);
 
   const isMergeCandidate = mergePair?.ids?.includes(id);
   const isDragging = Boolean(data?.dragging);
@@ -335,7 +333,7 @@ const StickyNoteNode = ({ id, data, selected }) => {
     startPoint.current = { x: event.clientX, y: event.clientY };
 
     longPressTimer.current = window.setTimeout(() => {
-      setContextMenu({ nodeId: id, x: event.clientX, y: event.clientY });
+      useCanvasStore.getState().setContextMenu({ nodeId: id, x: event.clientX, y: event.clientY });
     }, 550);
 
     const cancel = () => {
@@ -462,7 +460,6 @@ const CanvasExperience = () => {
   const setMergePair = useCanvasStore((state) => state.setMergePair);
   const clearMergePair = useCanvasStore((state) => state.clearMergePair);
   const contextMenu = useCanvasStore((state) => state.contextMenu);
-  const setContextMenu = useCanvasStore((state) => state.setContextMenu);
   const closeContextMenu = useCanvasStore((state) => state.closeContextMenu);
   const toggleSettings = useCanvasStore((state) => state.toggleSettings);
   const isSettingsOpen = useCanvasStore((state) => state.isSettingsOpen);
